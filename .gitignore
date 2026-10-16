@@ -1,0 +1,8 @@
+node_modules
+.github
+.vercel
+uploads
+.env
+
+.vercel
+.env*.local
