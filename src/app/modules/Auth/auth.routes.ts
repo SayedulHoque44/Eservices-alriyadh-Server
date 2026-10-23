@@ -12,7 +12,6 @@
 import express from "express";
 import httpStatus from "http-status";
 import auth, { sessionCookieOptions } from "../../../middlewares/auth";
-import { ConfigLimiter } from "../../../middlewares/RateLimiter/CreateRateLimiter";
 import validateRequest from "../../../middlewares/validateRequest";
 import config from "../../config";
 import catchAsync from "../../utils/catchAsync";
@@ -22,10 +21,9 @@ import { AuthValidation } from "./auth.validation";
 
 const router = express.Router();
 
-// Login: rate limited (10 tries / 15 min per IP) -> validated -> checked
+// Login: validated -> checked
 router.post(
   "/login",
-  ConfigLimiter.auth,
   validateRequest(AuthValidation.login),
   catchAsync(async (req, res) => {
     const { email, password } = req.body;
@@ -70,11 +68,10 @@ router.get(
   }),
 );
 
-// Change email and/or PIN. Rate limited like login, because it also checks a PIN.
+// Change email and/or PIN (current PIN required).
 // On success the old sessions stop working and this browser gets a fresh cookie.
 router.patch(
   "/account",
-  ConfigLimiter.auth,
   auth(),
   validateRequest(AuthValidation.updateAccount),
   catchAsync(async (req, res) => {

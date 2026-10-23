@@ -26,7 +26,9 @@ const akamaSchema = new Schema<IAkama>(
     organizationLicenseNumber: { type: String, trim: true, maxlength: 80, default: "" },
     // Storage key of the uploaded image (local disk or S3). The image itself is
     // only served through the API so visibility is checked on every request.
-    imageKey: { type: String, required: true },
+    // Attached right after the record is created (see AkamaFormModal), so "" at first.
+    // A record without an image can never be made public (akama.service.ts).
+    imageKey: { type: String, default: "" },
     // false = only the admin can see it; true = visible on the public pages
     isPublic: { type: Boolean, default: false, index: true },
   },

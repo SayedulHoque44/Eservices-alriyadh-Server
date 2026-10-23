@@ -58,4 +58,6 @@ exports.default = {
     aws_secret_key: process.env.AWS_SECRET_KEY,
     // Default folder inside the bucket when the client sends no folderName
     aws_s3_prefix: process.env.AWS_S3_PREFIX || "cards",
+    // CloudFront in front of the bucket: image URL = <this>/<key> (no trailing slash)
+    aws_images_cdn_base_url: (process.env.AWS_IMAGES_CDN_BASE_URL || "").replace(/\/+$/, ""),
 };

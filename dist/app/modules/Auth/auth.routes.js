@@ -50,7 +50,6 @@ exports.AuthRoutes = void 0;
 const express_1 = __importDefault(require("express"));
 const http_status_1 = __importDefault(require("http-status"));
 const auth_1 = __importStar(require("../../../middlewares/auth"));
-const CreateRateLimiter_1 = require("../../../middlewares/RateLimiter/CreateRateLimiter");
 const validateRequest_1 = __importDefault(require("../../../middlewares/validateRequest"));
 const config_1 = __importDefault(require("../../config"));
 const catchAsync_1 = __importDefault(require("../../utils/catchAsync"));
@@ -58,8 +57,8 @@ const sendResponse_1 = __importDefault(require("../../utils/sendResponse"));
 const auth_service_1 = require("./auth.service");
 const auth_validation_1 = require("./auth.validation");
 const router = express_1.default.Router();
-// Login: rate limited (10 tries / 15 min per IP) -> validated -> checked
-router.post("/login", CreateRateLimiter_1.ConfigLimiter.auth, (0, validateRequest_1.default)(auth_validation_1.AuthValidation.login), (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+// Login: validated -> checked
+router.post("/login", (0, validateRequest_1.default)(auth_validation_1.AuthValidation.login), (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     const result = yield auth_service_1.AuthService.login(email, password);
     // Session token goes in an HTTP-only cookie – never in the response body
@@ -91,9 +90,9 @@ router.get("/me", (0, auth_1.default)(), (0, catchAsync_1.default)((req, res) =>
         data: { email: admin.email },
     });
 })));
-// Change email and/or PIN. Rate limited like login, because it also checks a PIN.
+// Change email and/or PIN (current PIN required).
 // On success the old sessions stop working and this browser gets a fresh cookie.
-router.patch("/account", CreateRateLimiter_1.ConfigLimiter.auth, (0, auth_1.default)(), (0, validateRequest_1.default)(auth_validation_1.AuthValidation.updateAccount), (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.patch("/account", (0, auth_1.default)(), (0, validateRequest_1.default)(auth_validation_1.AuthValidation.updateAccount), (0, catchAsync_1.default)((req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const admin = req.admin;
     const result = yield auth_service_1.AuthService.updateAccount(admin._id.toString(), req.body);
     res.cookie(config_1.default.admin_cookie_name, result.token, Object.assign(Object.assign({}, (0, auth_1.sessionCookieOptions)()), { expires: result.expiresAt }));

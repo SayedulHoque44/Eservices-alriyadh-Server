@@ -111,7 +111,10 @@ const publicList = zod_1.z.object({
 const create = zod_1.z.object({
     body: zod_1.z.object(Object.assign(Object.assign({}, cardFields), { 
         // Optional on create: missing -> saved as ""
-        organizationName: cardFields.organizationName.default(""), organizationLicenseNumber: cardFields.organizationLicenseNumber.default(""), isPublic: booleanField.default(false), imageKey: imageKeyField })),
+        organizationName: cardFields.organizationName.default(""), organizationLicenseNumber: cardFields.organizationLicenseNumber.default(""), isPublic: booleanField.default(false), 
+        // Optional: the admin panel creates the record first and attaches the image
+        // afterwards with PATCH, so a rejected form never leaves an uploaded file behind
+        imageKey: imageKeyField.optional() })),
 });
 // PATCH /api/admin/akama/:id – every field optional (only send what changed)
 const update = zod_1.z.object({

@@ -128,7 +128,9 @@ const create = z.object({
     organizationName: cardFields.organizationName.default(""),
     organizationLicenseNumber: cardFields.organizationLicenseNumber.default(""),
     isPublic: booleanField.default(false),
-    imageKey: imageKeyField, // from POST /upload-url, after the browser PUT the file to S3
+    // Optional: the admin panel creates the record first and attaches the image
+    // afterwards with PATCH, so a rejected form never leaves an uploaded file behind
+    imageKey: imageKeyField.optional(),
   }),
 });
 

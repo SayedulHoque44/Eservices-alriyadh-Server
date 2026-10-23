@@ -26,6 +26,10 @@ function createRateLimiter({ windowMs, maxRequests, type, }) {
             case "auth":
                 identifier = `auth:${ipAddress}`;
                 break;
+            // Separate counter, so app logins never lock the admin out (and vice versa)
+            case "appAuth":
+                identifier = `appAuth:${ipAddress}`;
+                break;
             case "api":
                 identifier = req.user
                     ? `api:user:${req.user.id}`
@@ -159,6 +163,12 @@ exports.ConfigLimiter = {
         windowMs: 15 * 60 * 1000, // 15 minutes
         maxRequests: 10, // login attempts per IP
         type: "auth",
+    }),
+    // Applied to POST /api/app/absher/login in Absher/absher.routes.ts
+    appAuth: createRateLimiter({
+        windowMs: 15 * 60 * 1000, // 15 minutes
+        maxRequests: 10, // login attempts per IP
+        type: "appAuth",
     }),
     // Available for future use (not currently applied to any route)
     api: createRateLimiter({

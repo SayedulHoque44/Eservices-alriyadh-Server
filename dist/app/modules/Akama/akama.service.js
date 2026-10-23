@@ -83,7 +83,8 @@ const toAdminAkama = (doc) => {
         organizationLicenseNumber: doc.organizationLicenseNumber,
         isPublic: doc.isPublic,
         publicUrl: (0, exports.publicUrlFor)(id), // shown in admin + encoded in the QR code
-        imageUrl: `/api/admin/card/${id}/image?v=${version(doc)}`,
+        // "" = no image attached yet
+        imageUrl: doc.imageKey ? `/api/admin/card/${id}/image?v=${version(doc)}` : "",
         createdAt: doc.createdAt,
         updatedAt: doc.updatedAt,
     };
@@ -106,7 +107,7 @@ const toPublicAkama = (doc) => {
         programCompletionDate: doc.programCompletionDate,
         organizationName: doc.organizationName,
         organizationLicenseNumber: doc.organizationLicenseNumber,
-        imageUrl: `/api/public/card/${id}/image?v=${version(doc)}`,
+        imageUrl: doc.imageKey ? `/api/public/card/${id}/image?v=${version(doc)}` : "",
     };
 };
 exports.toPublicAkama = toPublicAkama;
@@ -183,10 +184,13 @@ const resolveImageKey = (input) => __awaiter(void 0, void 0, void 0, function* (
 });
 const create = (input) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
-    const imageKey = yield resolveImageKey(input); // validates type/size too
-    if (!imageKey)
-        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Please choose an Akama image.");
+    // The admin panel sends no image here (it attaches it right after); a record
+    // without an image is always saved private, so the public page never shows it.
+    if (input.isPublic && !input.imageKey) {
+        throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Add the Akama image before making the record public.");
+    }
     try {
+        const imageKey = yield resolveImageKey(input); // validates type/size too
         const doc = yield akama_model_1.AkamaModel.create({
             name: input.name,
             certificateNumber: input.certificateNumber,
@@ -202,13 +206,13 @@ const create = (input) => __awaiter(void 0, void 0, void 0, function* () {
             organizationName: (_a = input.organizationName) !== null && _a !== void 0 ? _a : "",
             organizationLicenseNumber: (_b = input.organizationLicenseNumber) !== null && _b !== void 0 ? _b : "",
             isPublic: input.isPublic,
-            imageKey,
+            imageKey: imageKey !== null && imageKey !== void 0 ? imageKey : "",
         });
         return (0, exports.toAdminAkama)(doc.toObject());
     }
     catch (error) {
         // Record could not be saved -> don't leave an unused image behind
-        yield (0, imageStorage_1.deleteImageSafely)(imageKey);
+        yield (0, imageStorage_1.deleteImageSafely)(input.imageKey);
         throw error;
     }
 });
@@ -230,6 +234,10 @@ const update = (id, input) => __awaiter(void 0, void 0, void 0, function* () {
     if (newKey)
         doc.imageKey = newKey;
     try {
+        // Public pages must always have an image
+        if (doc.isPublic && !doc.imageKey) {
+            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Add the Akama image before making the record public.");
+        }
         yield doc.save();
     }
     catch (error) {
@@ -244,6 +252,15 @@ const update = (id, input) => __awaiter(void 0, void 0, void 0, function* () {
 });
 /** Make Public / Make Private. Takes effect immediately on the public pages. */
 const setVisibility = (id, isPublic) => __awaiter(void 0, void 0, void 0, function* () {
+    // Public pages must always have an image
+    if (isPublic) {
+        const current = yield akama_model_1.AkamaModel.findById(id).lean();
+        if (!current)
+            throw new AppError_1.default(http_status_1.default.NOT_FOUND, NOT_FOUND);
+        if (!current.imageKey) {
+            throw new AppError_1.default(http_status_1.default.BAD_REQUEST, "Add the Akama image before making the record public.");
+        }
+    }
     const doc = yield akama_model_1.AkamaModel.findByIdAndUpdate(id, { isPublic }, { new: true }).lean();
     if (!doc)
         throw new AppError_1.default(http_status_1.default.NOT_FOUND, NOT_FOUND);
