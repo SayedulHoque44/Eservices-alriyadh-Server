@@ -37,6 +37,7 @@ exports.default = {
     public_app_url: (process.env.PUBLIC_APP_URL ||
         list(process.env.CLIENT_ORIGINS)[0] ||
         "http://localhost:3000").replace(/\/+$/, ""),
+    employee_permit_public_url: (process.env.EMPLOYEE_PERMIT_PUBLIC_URL || "https://myuser-info.com").replace(/\/+$/, ""),
     // ---------- Admin session ----------
     // Secret used to sign the admin session JWT (variable name kept from the original project)
     jwt_access_secret: process.env.JWT_ACCESS_SECRCT,

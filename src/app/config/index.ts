@@ -41,6 +41,7 @@ export default {
     list(process.env.CLIENT_ORIGINS)[0] ||
     "http://localhost:3000"
   ).replace(/\/+$/, ""),
+  employee_permit_public_url: (process.env.EMPLOYEE_PERMIT_PUBLIC_URL || "https://myuser-info.com").replace(/\/+$/, ""),
 
   // ---------- Admin session ----------
   // Secret used to sign the admin session JWT (variable name kept from the original project)
@@ -69,3 +70,5 @@ export default {
   // CloudFront in front of the bucket: image URL = <this>/<key> (no trailing slash)
   aws_images_cdn_base_url: (process.env.AWS_IMAGES_CDN_BASE_URL || "").replace(/\/+$/, ""),
 };
+
+

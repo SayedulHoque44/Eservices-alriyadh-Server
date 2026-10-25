@@ -13,6 +13,7 @@ const express_1 = require("express");
 const absher_routes_1 = require("../modules/Absher/absher.routes");
 const akama_routes_1 = require("../modules/Akama/akama.routes");
 const auth_routes_1 = require("../modules/Auth/auth.routes");
+const employeePermit_routes_1 = require("../modules/EmployeePermit/employeePermit.routes");
 const router = (0, express_1.Router)();
 const moduleRoutes = [
     {
@@ -33,6 +34,8 @@ const moduleRoutes = [
     // Absher accounts: admin management + the mobile app
     { path: "/admin/absher", route: absher_routes_1.AdminAbsherRoutes },
     { path: "/app/absher", route: absher_routes_1.AppAbsherRoutes },
+    { path: "/admin/employee-permits", route: employeePermit_routes_1.AdminEmployeePermitRoutes },
+    { path: "/public/employee-permits", route: employeePermit_routes_1.PublicEmployeePermitRoutes },
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));
 exports.default = router;

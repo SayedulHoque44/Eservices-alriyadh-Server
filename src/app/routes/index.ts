@@ -11,6 +11,7 @@ import { Router } from "express";
 import { AdminAbsherRoutes, AppAbsherRoutes } from "../modules/Absher/absher.routes";
 import { AdminAkamaRoutes, PublicAkamaRoutes } from "../modules/Akama/akama.routes";
 import { AuthRoutes } from "../modules/Auth/auth.routes";
+import { AdminEmployeePermitRoutes, PublicEmployeePermitRoutes } from "../modules/EmployeePermit/employeePermit.routes";
 
 const router = Router();
 
@@ -33,8 +34,12 @@ const moduleRoutes = [
   // Absher accounts: admin management + the mobile app
   { path: "/admin/absher", route: AdminAbsherRoutes },
   { path: "/app/absher", route: AppAbsherRoutes },
+  { path: "/admin/employee-permits", route: AdminEmployeePermitRoutes },
+  { path: "/public/employee-permits", route: PublicEmployeePermitRoutes },
 ];
 
 moduleRoutes.forEach(route => router.use(route.path, route.route));
 
 export default router;
+
+
